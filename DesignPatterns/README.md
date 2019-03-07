@@ -2405,7 +2405,16 @@ bill 本周获取薪资：5700
 * 破坏封装。访问者模式要求访问者对象访问并调用每一个元素对象的操作，这意味着元素对象有时候必须暴露一些自己的内部操作和内部状态，否则无法供访问者访问。
 
 
-# 七、总结
+# 总结
 
 系统地学习设计模式后，你可以在过往的开发经历中发现，设计模式是无处不在的。在学习设计模式之前的很多时候我们是凭借过往经验和智慧来完善系统的设计，而这些经验很多和某个设计模式的思想不谋而合。
 
+还有一些地方没有完全理解，文中有误之处还望不吝指出。
+
+# 参考
+
+
+* [https://juejin.im/user/57f8ffda2e958a005581e3c0/posts](https://juejin.im/user/57f8ffda2e958a005581e3c0/posts)
+* [https://design-patterns.readthedocs.io/zh_CN/latest/index.html](https://design-patterns.readthedocs.io/zh_CN/latest/index.html)
+* [https://blog.csdn.net/lovelion/article/details/17517213](https://blog.csdn.net/lovelion/article/details/17517213)
+* [https://github.com/skyming/Trip-to-iOS-Design-Patterns](https://github.com/skyming/Trip-to-iOS-Design-Patterns)
