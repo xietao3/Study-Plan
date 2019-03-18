@@ -85,7 +85,6 @@
 - (void)deleteFirstRecordWithApp:(XCUIApplication *)app {
     NSInteger cellsCount = app.cells.count;
     
-    XCTNSPredicateExpectation
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"count == %d",cellsCount-1];
     // 设置一个预期 判断 app.cells 的 count 属性会等于 cellsCount-1， 等待直至失败，如果符合则不再等待
     [self expectationForPredicate:predicate evaluatedWithObject:app.cells handler:nil];
