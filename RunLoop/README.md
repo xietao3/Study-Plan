@@ -1,11 +1,15 @@
+# RunLoop 学习笔记
+
+> 对本文感兴趣的同学可以查看本文 [Demo](./Demo) ，其中实现了本文大部分相关内容。
+
 ## 一、RunLoop
 
 ### 1.1 RunLoop 的概念
 
-
 ``RunLoop``和线程是一对一的关系，通常来讲线程执行完任务之后就会退出，有时候我们需要一个常驻线程帮我们处理事件，处理完成也不会退出，等待下一次处理事件。
 
 这种机制一般称作为 **事件循环机制(EventLoop)** ，RunLoop 管理了其需要处理的事件和消息，并提供了一个入口函数来执行上面``EventLoop``的逻辑。线程执行了这个函数后，就会一直处于这个函数内部 ``接受消息->等待->处理`` 的循环中。当没有事件的时候进入休眠状态，避免占用资源，一旦受到事件就将被唤醒来处理事件，直到这个循环结束，函数返回。
+
 
 ### 1.2 获得 RunLoop
 
@@ -227,7 +231,7 @@ CFRunLoopSourceRef 是事件产生的来源。从 CFRunLoopMode 的结构中可�
 * 将``CFRunLoopSourceRef``加入当前线程 RunLoop
 * 通过 ``CFRunLoopSourceRef`` 发送信号并唤醒 RunLoop 处理
 
-文章中的全部 OC 代码可以在本文 [Demo]() 中找到。
+文章中的全部 OC 代码可以在本文 [Demo](./Demo) 中找到。
 
 下面的代码展示了如何创建``CFRunLoopSourceContext ``，并借此创建``CFRunLoopSourceRef ``，最后将``CFRunLoopSourceRef ``加入到 RunLoop 中。
 
@@ -570,7 +574,7 @@ observers = (
 
 如果对上面的内容有了初步了解，那应该掌握了 RunLoop 内部大概的组成结构，这个时候可以来看看 RunLoop 其内部运行的逻辑。
 
-这里羞耻的直接贴上 YY 大神简化后的逻辑，相信很多人已经看过，不过还是贴出来让更多人知道（文末有参考链接），对更多细节感兴趣的同学可以看[源码](https://opensource.apple.com/source/CF/CF-855.17/)查看。
+这里羞耻的直接贴上 YY 大神简化后的逻辑，相信很多人已经看过，不过还是贴出来让更多人知道（文末有参考链接），对更多细节感兴趣的同学可以在[源码](https://opensource.apple.com/source/CF/CF-855.17/)中查看。
 
 ```
 /// 用DefaultMode启动
