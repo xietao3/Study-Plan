@@ -560,7 +560,7 @@ observers = (
 
 第二个 Observer 监视了两个事件： BeforeWaiting(准备进入休眠) 时调用``_objc_autoreleasePoolPop()``和``_objc_autoreleasePoolPush()``释放旧的池并创建新池； Exit (即将退出 Loop ) 时调用``_objc_autoreleasePoolPop()``来释放自动释放池。这个 Observer 的 order 是 2147483647，优先级最低，保证其释放池子发生在其他所有回调之后。
 
-和主线程不同，在创建子线程时，在线程的入口函数中，我们就需要自己加上自动释放池代码：
+在创建子线程时，在线程的入口函数中，我们就需要自己加上自动释放池代码：
 
 ```
 - (void)threadEntryPoint {
