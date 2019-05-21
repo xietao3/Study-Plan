@@ -1228,11 +1228,13 @@ void autoReleasingFunction() {
 
 * ``hotPage``：是当前正在使用的``page``，操作都是在``hotPage``上完成，一般处于链表末端或者倒数第二个位置。存储在 TLS 中，可以理解为一个每个线程共享一个自动释放池链表。
 
-* ``coldPage``：位于链表头部的``page``。
+* ``coldPage``：位于链表头部的``page``，可能同时为``hotPage``。
 
 * ``POOL_BOUNDARY``：``nil``的宏定义，替代之前的哨兵对象``POOL_SENTINEL``，在自动释放池创建时，在``objc_autoreleasePoolPush``中将其推入自动释放池中。在调用``objc_autoreleasePoolPop``时，会将池中对象按顺序释放，直至遇到最近一个``POOL_BOUNDARY``时停止。
 
 * ``EMPTY_POOL_PLACEHOLDER``：当自动释放池中没有推入过任何对象时，这个时候推入一个``POOL_BOUNDARY``，会先将``EMPTY_POOL_PLACEHOLDER``存储在 TLS 中作为标识符，并且此次并不推入``POOL_BOUNDARY``。等再次有对象被推入自动释放池时，检查在 TLS 中取出该标识符，这个时候再推入``POOL_BOUNDARY``。
+
+* ``next``：指向``AutoreleasePoolPage``空位指针，每次加入新的元素会向后移动。
 
 
 
@@ -1421,6 +1423,56 @@ static inline void pop(void *token)
 2. 检查``stop``既不是``POOL_BOUNDARY``也不是``coldPage()->begin()``的情况将报错。
 3. 清空自动释放池中``stop``之后的所有对象。
 4. 判断当前``page``如果没有达到半满，则干掉所有后续所有 page，如果超过半满则只保留下一个``page``。
+
+### 5.5 add 和 releaseUntil 
+
+整个``AutoreleasePoolPage``就是一个堆栈，通过``AutoreleasePoolPage``的``add``方法将对象加入自动释放池：
+
+```
+id *add(id obj)
+{
+    assert(!full());
+    unprotect();
+    id *ret = next;  // 复制指针
+    *next++ = obj;  // 将 obj 存入 next 指向的内存地址后，next 向后移指向下一个空地址
+    protect();
+    return ret;
+}
+```
+
+这段逻辑非常简单，``add``方法将新加入的对象存入栈顶指针``next``指向的地址中，然后指向下一个位置。
+
+下面是``AutoreleasePoolPage``出栈的实现：
+
+```
+void releaseUntil(id *stop) 
+{
+    // 当 next 和 stop 不是指向同一块内存地址，则继续执行
+    while (this->next != stop) {
+        AutoreleasePoolPage *page = hotPage();
+        // 如果 hotPage 空了，则设置上一个 page 为 hotPage
+        while (page->empty()) {
+            page = page->parent;
+            setHotPage(page);
+        }
+        page->unprotect();
+        id obj = *--page->next; // page->next-- 后指向当前栈顶元素
+        memset((void*)page->next, SCRIBBLE, sizeof(*page->next)); // 将栈顶元素内存清空
+        page->protect();
+        if (obj != POOL_BOUNDARY) {
+            objc_release(obj); // 栈顶元素引用计数 - 1
+        }
+    }
+    setHotPage(this);
+}
+```
+
+这段代码大致逻辑：
+
+1. 判断栈顶指针``next``和``stop``不是指向同一块内存地址时，继续出栈。
+2. 判断当前``page``如果被清空，则继续清理链表中的上一个``page``。
+3. 出栈，栈顶指针往下移，清空栈顶内存。
+4. 如果当前出栈的不是``POOL_BOUNDARY``，则调用``objc_release``引用计数 - 1 。
 
 
 ## 体会
