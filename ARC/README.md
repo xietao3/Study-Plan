@@ -1424,7 +1424,7 @@ static inline void pop(void *token)
 3. 清空自动释放池中``stop``之后的所有对象。
 4. 判断当前``page``如果没有达到半满，则干掉所有后续所有 page，如果超过半满则只保留下一个``page``。
 
-### 5.5 add 和 releaseUntil 
+### 5.6 add 和 releaseUntil 
 
 整个``AutoreleasePoolPage``就是一个堆栈，通过``AutoreleasePoolPage``的``add``方法将对象加入自动释放池：
 
